@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Reekoh/connector-plugin-seed"
+    "url": "https://github.com/Reekoh/pusher-connector"
   },
   "dependencies": {
     "lodash.isempty": "^3.0.4",
