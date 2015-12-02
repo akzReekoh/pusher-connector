@@ -1,0 +1,38 @@
+{
+  "app_id": {
+	"label": "Application ID",
+	"type": "String",
+	"required": true,
+	"help": "Please provide your Pusher Applicaiton ID."
+  },
+  "app_key": {
+	"label": "Application Key",
+	"type": "String",
+	"required": true,
+	"help": "Please provide your Pusher Applicaiton Key."
+  },
+  "app_secret": {
+    "label": "Application Secret",
+    "type": "String",
+    "required": true,
+    "help": "Please provide your Pusher Applicaiton Secret."
+  },
+  "default_channel": {
+    "label": "Default Channel",
+    "type": "String",
+    "required": true,
+    "help": "Please provide a Pusher default channel."
+  },
+  "default_event": {
+    "label": "Default Event",
+    "type": "String",
+    "required": true,
+    "help": "Please provide your Pusher default event."
+  },
+  "default_message": {
+    "label": "Default Message",
+    "type": "String",
+    "required": true,
+    "help": "Please provide your Pusher default message."
+  }
+}
