@@ -13,7 +13,7 @@
   },
   "app_secret": {
     "label": "Application Secret",
-    "type": "String",
+    "type": "Password",
     "required": true,
     "help": "Please provide your Pusher Applicaiton Secret."
   },
