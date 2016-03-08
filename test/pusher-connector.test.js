@@ -11,8 +11,12 @@ var cp     = require('child_process'),
 describe('Connector', function () {
 	this.slow(5000);
 
-	after('terminate child process', function () {
-		connector.kill('SIGKILL');
+	after('terminate child process', function (done) {
+		this.timeout(7000);
+		setTimeout(() => {
+			connector.kill('SIGKILL');
+			done();
+		}, 5000);
 	});
 
 	describe('#spawn', function () {
@@ -49,7 +53,7 @@ describe('Connector', function () {
 	});
 
 	describe('#data', function (done) {
-		it('should process the data', function () {
+		it('should process the JSON data', function () {
 			connector.send({
 				type: 'data',
 				data: {
@@ -57,6 +61,26 @@ describe('Connector', function () {
                     event : 'test-event',
                     message : 'This is a test message from Pusher Connector.'
 				}
+			}, done);
+		});
+	});
+
+	describe('#data', function (done) {
+		it('should process the Array data', function () {
+			connector.send({
+				type: 'data',
+				data: [
+						{
+							channel : 'test-channel',
+							event : 'test-event',
+							message : 'This is a test message from Pusher Connector.'
+						},
+						{
+							channel : 'test-channel',
+							event : 'test-event',
+							message : 'This is a test message from Pusher Connector.'
+						}
+					]
 			}, done);
 		});
 	});

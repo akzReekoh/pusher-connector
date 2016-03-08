@@ -3,9 +3,31 @@
 var platform = require('./platform'),
     isEmpty = require('lodash.isempty'),
     isPlainObject = require('lodash.isplainobject'),
+    isArray = require('lodash.isarray'),
+    async = require('async'),
     domain = require('domain'),
     d = domain.create(),
 	config,pusherClient;
+
+let sendData = (data) => {
+    if(isEmpty(data.channel))
+        data.channel = config.channel;
+
+    if(isEmpty(data.event))
+        data.event = config.event;
+
+    if(isEmpty(data.message))
+        data.message = config.message;
+
+    pusherClient.trigger(data.channel, data.event, {
+        message: data.message
+    });
+
+    platform.log(JSON.stringify({
+        title: 'Pusher Message Sent.',
+        data: data
+    }));
+};
 
 platform.on('data', function (data) {
     d.once('error', function(error){
@@ -16,26 +38,15 @@ platform.on('data', function (data) {
 
     d.run(function(){
         if(isPlainObject(data)){
-            if(isEmpty(data.channel))
-                data.channel = config.channel;
-
-            if(isEmpty(data.event))
-                data.event = config.event;
-
-            if(isEmpty(data.message))
-                data.message = config.message;
-
-            pusherClient.trigger(data.channel, data.event, {
-                message: data.message
+            sendData(data);
+        }
+        else if(isArray(data)){
+            async.each(data, (datum) => {
+                sendData(datum);
             });
-
-            platform.log(JSON.stringify({
-                title: 'Pusher Message Sent.',
-                data: data
-            }));
         }
         else
-            platform.handleException(new Error('Invalid data received. Must be a valid JSON Object. Data ' + data));
+            platform.handleException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data ' + data));
     });
 });
 
