@@ -6,48 +6,54 @@ var platform = require('./platform'),
     isArray = require('lodash.isarray'),
     async = require('async'),
     domain = require('domain'),
-    d = domain.create(),
 	config,pusherClient;
 
-let sendData = (data) => {
-    if(isEmpty(data.channel))
-        data.channel = config.channel;
+let sendData = (data, callback) => {
+    let d = domain.create();
 
-    if(isEmpty(data.event))
-        data.event = config.event;
-
-    if(isEmpty(data.message))
-        data.message = config.message;
-
-    pusherClient.trigger(data.channel, data.event, {
-        message: data.message
-    });
-
-    platform.log(JSON.stringify({
-        title: 'Pusher Message Sent.',
-        data: data
-    }));
-};
-
-platform.on('data', function (data) {
     d.once('error', function(error){
-        console.error(error);
-        platform.handleException(error);
+        callback(error);
         d.exit();
     });
 
-    d.run(function(){
-        if(isPlainObject(data)){
-            sendData(data);
-        }
-        else if(isArray(data)){
-            async.each(data, (datum) => {
-                sendData(datum);
-            });
-        }
-        else
-            platform.handleException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data ' + data));
+    d.run(() => {
+        if(isEmpty(data.channel))
+            data.channel = config.channel;
+
+        if(isEmpty(data.event))
+            data.event = config.event;
+
+        if(isEmpty(data.message))
+            data.message = config.message;
+
+        pusherClient.trigger(data.channel, data.event, {
+            message: data.message
+        });
+
+        platform.log(JSON.stringify({
+            title: 'Pusher Message Sent.',
+            data: data
+        }));
     });
+};
+
+platform.on('data', function (data) {
+    if(isPlainObject(data)){
+        sendData(data, (error) => {
+            console.error(error);
+            platform.handleException(error);
+        });
+    }
+    else if(isArray(data)){
+        async.each(data, (datum, done) => {
+            sendData(datum, done);
+        }, (error) => {
+            console.error(error);
+            platform.handleException(error);
+        });
+    }
+    else
+        platform.handleException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data ' + data));
 });
 
 platform.once('close', function () {
