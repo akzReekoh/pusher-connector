@@ -1,85 +1,88 @@
-'use strict';
+'use strict'
 
-var platform = require('./platform'),
-    isEmpty = require('lodash.isempty'),
-    isPlainObject = require('lodash.isplainobject'),
-    isArray = require('lodash.isarray'),
-    async = require('async'),
-    domain = require('domain'),
-	config,pusherClient;
+let reekoh = require('reekoh')
+let _plugin = new reekoh.plugins.Connector()
+let async = require('async')
+let isArray = require('lodash.isarray')
+let isEmpty = require('lodash.isempty')
+let isPlainObject = require('lodash.isplainobject')
+let domain = require('domain')
+let pusherClient = null
 
 let sendData = (data, callback) => {
-    let d = domain.create();
+  let d = domain.create()
 
-    d.once('error', function(error){
-        callback(error);
-        d.exit();
-    });
+  d.once('error', (error) => {
+    callback(error)
+    d.exit()
+  })
 
-    d.run(() => {
-        if(isEmpty(data.channel))
-            data.channel = config.channel;
+  d.run(() => {
+    if (isEmpty(data.channel)) { data.channel = _plugin.config.defaultChannel }
 
-        if(isEmpty(data.event))
-            data.event = config.event;
-
-        if(isEmpty(data.message))
-            data.message = config.message;
-
-        pusherClient.trigger(data.channel, data.event, {
-            message: data.message
-        });
-
-        platform.log(JSON.stringify({
-            title: 'Pusher Message Sent.',
-            data: data
-        }));
-    });
-};
-
-platform.on('data', function (data) {
-    if(isPlainObject(data)){
-        sendData(data, (error) => {
-            if(error) {
-                console.error(error);
-                platform.handleException(error);
-            }
-        });
+    if (isEmpty(data.event)) {
+      data.event = _plugin.config.defaultEvent
     }
-    else if(isArray(data)){
-        async.each(data, (datum, done) => {
-            sendData(datum, done);
-        }, (error) => {
-            if(error) {
-                console.error(error);
-                platform.handleException(error);
-            }
-        });
+
+    if (isEmpty(data.message)) {
+      data.message = _plugin.config.defaultMessage
     }
-    else
-        platform.handleException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data ' + data));
-});
 
-platform.once('close', function () {
-    platform.notifyClose();
-});
+    pusherClient.trigger(data.channel, data.event, {
+      message: data.message
+    })
 
-platform.once('ready', function (options) {
-    var Pusher = require('pusher');
+    _plugin.log(JSON.stringify({
+      title: 'Pusher Message Sent.',
+      data: data
+    }))
 
-    pusherClient = new Pusher({
-        appId: options.app_id,
-        key: options.app_key,
-        secret: options.app_secret,
-        encrypted: true
-    });
+    callback()
+  })
+}
 
-    config = {
-        channel: options.default_channel,
-        event: options.default_event,
-        message: options.default_message
-    };
+/**
+ * Emitted when device data is received.
+ * This is the event to listen to in order to get real-time data feed from the connected devices.
+ * @param {object} data The data coming from the device represented as JSON Object.
+ */
+_plugin.on('data', (data) => {
+  if (isPlainObject(data)) {
+    sendData(data, (error) => {
+      if (error) {
+        console.error(error)
+        _plugin.logException(error)
+      }
+    })
+  } else if (isArray(data)) {
+    async.each(data, (datum, done) => {
+      sendData(datum, done)
+    }, (error) => {
+      if (error) {
+        console.error(error)
+        _plugin.logException(error)
+      }
+    })
+  } else {
+    _plugin.logException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data ' + data))
+  }
+})
 
-    platform.log('Pusher Connector Initialized.');
-    platform.notifyReady();
-});
+/**
+ * Emitted when the platform bootstraps the plugin. The plugin should listen once and execute its init process.
+ */
+_plugin.once('ready', () => {
+  let Pusher = require('pusher')
+
+  pusherClient = new Pusher({
+    appId: _plugin.config.appId,
+    key: _plugin.config.appKey,
+    secret: _plugin.config.appSecret,
+    encrypted: true
+  })
+
+  _plugin.log('Pusher Connector has been initialized.')
+  _plugin.emit('init')
+})
+
+module.exports = _plugin
