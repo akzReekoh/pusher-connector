@@ -11,43 +11,43 @@ metadata:
   price: 0
   tags:
     - pusher
-  config:
-    appId:
-      label: Application ID
-      type: String
-      required: true
-      help: Please provide your Pusher Applicaiton ID.
-      maxLength: 1000
-    appKey:
-      label: Application Key
-      type: String
-      required: true
-      help: Please provide your Pusher Applicaiton Key.
-      maxLength: 1000
-    appSecret:
-      label: Application Secret
-      type: Password
-      required: true
-      help: Please provide your Pusher Applicaiton Secret.
-    defaultChannel:
-      label: Default Channel
-      type: String
-      required: true
-      help: Please provide a Pusher default channel.
-      maxLength: 1000
-    defaultEvent:
-      label: Default Event
-      type: String
-      required: true
-      help: Please provide your Pusher default event.
-      maxLength: 1000
-    defaultMessage:
-      label: Default Message
-      type: String
-      required: true
-      help: Please provide your Pusher default message.
-      maxLength: 1000
   release:
     version: 1.0.0
     notes: path/to/RELEASENOTESv1.0.0.md
     image: path/to/docker/image
+    config:
+        appId:
+          label: Application ID
+          type: String
+          required: true
+          help: Please provide your Pusher Applicaiton ID.
+          maxLength: 1000
+        appKey:
+          label: Application Key
+          type: String
+          required: true
+          help: Please provide your Pusher Applicaiton Key.
+          maxLength: 1000
+        appSecret:
+          label: Application Secret
+          type: Password
+          required: true
+          help: Please provide your Pusher Applicaiton Secret.
+        defaultChannel:
+          label: Default Channel
+          type: String
+          required: true
+          help: Please provide a Pusher default channel.
+          maxLength: 1000
+        defaultEvent:
+          label: Default Event
+          type: String
+          required: true
+          help: Please provide your Pusher default event.
+          maxLength: 1000
+        defaultMessage:
+          label: Default Message
+          type: String
+          required: true
+          help: Please provide your Pusher default message.
+          maxLength: 1000
